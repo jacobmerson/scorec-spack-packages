@@ -16,6 +16,11 @@ class M3dc1(CMakePackage, CudaPackage):
 
     maintainers("TBD")
 
+    # With a Kokkos +wrapper dependency, the MPI C++ wrapper calls nvcc_wrapper,
+    # which links with the real host compiler rather than Spack's compiler
+    # wrapper, so injected flags never reach C++ links. Pass them through CMake.
+    flag_handler = build_system_flags
+
     version("test", branch="yus/cmake")
 
     # ------------------------------------------------------------------
