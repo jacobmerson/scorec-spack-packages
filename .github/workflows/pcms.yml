@@ -81,7 +81,8 @@ jobs:
       container: rocm/dev-ubuntu-24.04:6.4.2
       base-image: rocm/dev-ubuntu-24.04:6.4.2
 
-  # Combines the per-architecture images under pcms-develop.
+  # Combines the per-architecture images under pcms-develop, also published as
+  # ghcr.io/scorec/pcms:develop, the name the pcms README documents.
   publish-image:
     needs: [image-date, build, build-arm]
     if: ${{ !cancelled() && (needs.build.outputs.image != '' || needs.build-arm.outputs.image != '') }}
@@ -96,18 +97,21 @@ jobs:
       id: publish
       env:
         REPO: ghcr.io/scorec/scorec-spack-buildcache
+        PUBLIC: ghcr.io/scorec/pcms
         DATE: ${{ needs.image-date.outputs.date }}
         BUILT: ${{ needs.build.outputs.image }} ${{ needs.build-arm.outputs.image }}
       run: |
-        docker buildx imagetools create -t "$REPO:pcms-develop-$DATE" $BUILT
+        docker buildx imagetools create \
+          -t "$REPO:pcms-develop-$DATE" -t "$PUBLIC:develop-$DATE" $BUILT
         latest=()
         for arch in amd64 arm64; do
           if docker buildx imagetools inspect "$REPO:pcms-develop-$arch" >/dev/null 2>&1; then
             latest+=("$REPO:pcms-develop-$arch")
           fi
         done
-        docker buildx imagetools create -t "$REPO:pcms-develop" "${latest[@]}"
-        echo "image=$REPO:pcms-develop-$DATE" >> "$GITHUB_OUTPUT"
+        docker buildx imagetools create \
+          -t "$REPO:pcms-develop" -t "$PUBLIC:develop" "${latest[@]}"
+        echo "image=$PUBLIC:develop-$DATE" >> "$GITHUB_OUTPUT"
         {
           echo "Built this run: $BUILT"
           echo
