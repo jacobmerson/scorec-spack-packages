@@ -36,6 +36,10 @@ class Meshfields(CMakePackage, CudaPackage, ROCmPackage):
     license("BSD-3", checked_by="jacobmerson")
 
     version('main', branch='main')
+    # The default version. meshFields PR #75 (main at f7c97cf) compiles
+    # evaluate(), whose Kokkos::View<Real *[numComponents]> nvcc's host
+    # compilation rejects, so this is the main commit before it.
+    version('1.0.0.20261022', commit='604f42f56bf671a2781fb779fa833c52cfd42f62')
 
     variant('shared', default=False, description='enable shared library builds')
     variant('tests', default=False, description='enable build of tests')
