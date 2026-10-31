@@ -23,6 +23,12 @@ class M3dc1(CMakePackage, CudaPackage):
 
     version("master", branch="master")
 
+    # scorec_matrix.f90 includes petsc/finclude/petsc.h only to declare the
+    # PetscLogDouble values that PetscMemoryGetCurrentUsage returns. CMake's
+    # Makefile Fortran dependency scanner hangs on PETSc's mutually including
+    # Fortran headers, so the patch declares them double precision instead.
+    patch("m3dc1-scorec-matrix-no-petsc-include.patch", when="@master")
+
     # ------------------------------------------------------------------
     # Variants mirroring the -D flags in your cmake invocation
     # ------------------------------------------------------------------
